@@ -54,13 +54,13 @@ public class FormulaParserImpl implements FormulaParser {
         Deque<Formula> formulaParts = new LinkedList<>();
 
         while (!text.isEmpty()) {
-            if (isNumeric(text)) {
+            if (isNumeric(text.charAt(0))) {
                 formulaParts.add(parseOperand(text));
             }
-            else if (isOpenParenthesis(text)) {
+            else if (isOpenParenthesis(text.charAt(0))) {
                 formulaParts.add(parseParenthesis(text));
             }
-            else if (isCloseParenthesis(text)) {
+            else if (isCloseParenthesis(text.charAt(0))) {
                 return formulaParts;
             }
             else {
@@ -74,10 +74,13 @@ public class FormulaParserImpl implements FormulaParser {
     private Formula composeFormula(Deque<Formula> formulaParts) {
         Formula firstOperand = formulaParts.pop();
 
-        /*
-            Second part of a formula is always an operator
-            Also the root of the tree is always an operator
-         */
+        if (formulaParts.isEmpty()) {
+            // Formula contains only one operand
+            return firstOperand;
+        }
+
+        // Second part of a formula is always an operator
+        // Also the root of the tree is always an operator
         Operator root = (Operator) formulaParts.pop();
         root.setLeft(firstOperand);
 
@@ -105,20 +108,16 @@ public class FormulaParserImpl implements FormulaParser {
         return root;
     }
 
-    private static boolean isNumeric(StringBuilder text, int index) {
-        return text.charAt(index) >= '0' && text.charAt(index) <= '9';
+    private static boolean isNumeric(char c) {
+        return c >= '0' && c <= '9';
     }
 
-    private static boolean isNumeric(StringBuilder text) {
-        return isNumeric(text, 0);
+    private static boolean isOpenParenthesis(char c) {
+        return c == '(';
     }
 
-    private static boolean isOpenParenthesis(StringBuilder text) {
-        return text.charAt(0) == '(';
-    }
-
-    private static boolean isCloseParenthesis(StringBuilder text) {
-        return text.charAt(0) == ')';
+    private static boolean isCloseParenthesis(char c) {
+        return c == ')';
     }
 
 }

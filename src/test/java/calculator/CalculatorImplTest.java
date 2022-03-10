@@ -48,6 +48,14 @@ public class CalculatorImplTest {
     }
 
     @Test
+    void newTest() {
+        int calculated = calculator.calculate("3234");
+        int reference = 3234;
+
+        Assertions.assertEquals(calculated, reference);
+    }
+
+    @Test
     void testComplexFormula() {
         int calculated = calculator.calculate("10 + 2 * 6 + 33 / 3 + 100 + 20 + (00100 + 2 + 3) * 5");
         int reference = 10 + 2 * 6 + 33 / 3 + 100 + 20 + (100 + 2 + 3) * 5;
