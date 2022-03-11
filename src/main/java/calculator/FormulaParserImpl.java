@@ -88,24 +88,54 @@ public class FormulaParserImpl implements FormulaParser {
             Formula current = formulaParts.pop();
 
             if (current instanceof Operator currentOperator) {
-                if (currentOperator.compareTo(root) > 0) {
-                    currentOperator.setLeft(root.getRight());
-                    root.setRight(currentOperator);
-                }
-                else {
-                    currentOperator.setLeft(root);
-                    root = currentOperator;
-                }
-            }
-            else if (root.getRight() == null) {
-                root.setRight(current);
+                currentOperator.setLeft(root);
+                root = currentOperator;
             }
             else {
-                ((Operator) root.getRight()).setRight(current);
+                root.setRight(current);
             }
         }
 
+        return arrangeTreeOperators(root);
+    }
+
+    private Operator arrangeTreeOperators(Operator root) {
+        if (root.getRight().getClass() != Operator.class && root.getLeft().getClass() != Operator.class)
+            return root;
+
+        if (root.getLeft() instanceof Operator leftOperator) {
+            root.setLeft( arrangeTreeOperators(leftOperator) );
+        }
+        if (root.getRight() instanceof Operator rightOperator) {
+            root.setRight( arrangeTreeOperators(rightOperator) );
+        }
+
+        if (root.getRight() instanceof Operator right && right.compareTo(root) < 0) {
+            root = leftRotateTree(root);
+        }
+        if (root.getLeft() instanceof Operator left && left.compareTo(root) < 0) {
+            root = rightRotateTree(root);
+        }
+
         return root;
+    }
+
+    private static Operator leftRotateTree(Operator root) {
+        Operator right = (Operator) root.getRight();
+
+        root.setRight(right.getLeft());
+        right.setLeft(root);
+
+        return right;
+    }
+
+    private static Operator rightRotateTree(Operator root) {
+        Operator left = (Operator) root.getLeft();
+
+        root.setLeft(left.getRight());
+        left.setRight(root);
+
+        return left;
     }
 
     private static boolean isNumeric(char c) {
