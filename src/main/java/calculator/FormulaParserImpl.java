@@ -108,9 +108,6 @@ public class FormulaParserImpl implements FormulaParser {
     }
 
     private Operator arrangeTreeOperators(Operator root) {
-        if (root.getRight().getClass() != Operator.class && root.getLeft().getClass() != Operator.class)
-            return root;
-
         if (root.getLeft() instanceof Operator leftOperator) {
             root.setLeft( arrangeTreeOperators(leftOperator) );
         }
