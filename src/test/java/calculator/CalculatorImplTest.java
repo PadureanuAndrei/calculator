@@ -4,12 +4,12 @@ import calculator.exceptions.InvalidExpressionException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class CalculatorImplTest {
+class CalculatorImplTest {
     private final CalculatorImpl calculator = new CalculatorImpl();
 
     @Test
     void testSum() {
-        int calculated = calculator.calculate("1 + 2");
+        int calculated = calculator.calculate("(((1 + 2)))");
         int reference = 1 + 2;
 
         Assertions.assertEquals(calculated, reference);

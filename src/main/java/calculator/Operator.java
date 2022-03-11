@@ -55,7 +55,7 @@ public class Operator implements Formula, Comparable<Operator> {
         OperatorType(char type) {
         }
 
-        public static OperatorType getOperatorType(char type) throws RuntimeException {
+        public static OperatorType getOperatorType(char type) throws InvalidExpressionException {
             return switch (type) {
                 case '-' -> OperatorType.DIFFERENCE;
                 case '+' -> OperatorType.SUM;

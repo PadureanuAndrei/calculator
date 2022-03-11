@@ -14,61 +14,69 @@ public class FormulaParserImpl implements FormulaParser {
     public Formula parse(String text) {
         text = text.replaceAll("\\s+", "");
 
-        Deque<Formula> formulaParts = parseFormulaParts(new StringBuilder(text));
+        Deque<Formula> formulaParts = parseFormulaParts(text);
 
         return composeFormula(formulaParts);
     }
 
-    private Operand parseOperand(StringBuilder text) {
+    private int parseOperand(String text, int offset, Deque<Formula> formulaParts) {
         Matcher matcher = NUMBER_REGEX.matcher(text);
-        if (!matcher.find()) {
+        if (!matcher.find(offset)) {
             throw new InvalidExpressionException();
         }
 
         String operand = matcher.group();
         int value = Integer.parseInt(operand);
 
-        text.delete(0, operand.length());
+        formulaParts.add(new Operand(value));
 
-        return new Operand(value);
+        return offset + operand.length();
     }
 
-    private Operator parseOperator(StringBuilder text) {
-        Operator operator = new Operator(text.charAt(0));
-        text.delete(0, 1);
+    private int parseOperator(String text, int offset, Deque<Formula> formulaParts) {
+        Operator operator = new Operator(text.charAt(offset));
+        formulaParts.add(operator);
 
-        return operator;
+        return offset + 1;
     }
 
-    private Formula parseParenthesis(StringBuilder text) {
-        text.delete(0, 1); // Remove '('
-        Deque<Formula> formulaParts = parseFormulaParts(text);
-        text.delete(0, 1); // Remove ')'
+    private int parseParenthesis(String text, int offset, Deque<Formula> formulaParts) {
+        Deque<Formula> innerFormulaParts = new LinkedList<>();
 
-        Formula innerFormula = composeFormula(formulaParts);
+        offset = parseFormulaParts(text, offset + 1, innerFormulaParts) + 1;
 
-        return new ParenthesisFormula(innerFormula);
+
+        Formula innerFormula = composeFormula(innerFormulaParts);
+        formulaParts.add(new ParenthesisFormula(innerFormula));
+
+        return offset;
     }
 
-    private Deque<Formula> parseFormulaParts(StringBuilder text) {
+    private Deque<Formula> parseFormulaParts(String text) {
         Deque<Formula> formulaParts = new LinkedList<>();
 
-        while (!text.isEmpty()) {
-            if (isNumeric(text.charAt(0))) {
-                formulaParts.add(parseOperand(text));
+        parseFormulaParts(text, 0, formulaParts);
+
+        return formulaParts;
+    }
+
+    private int parseFormulaParts(String text, int offset, Deque<Formula> formulaParts) {
+        while (offset < text.length()) {
+            if (isNumeric(text.charAt(offset))) {
+                offset = parseOperand(text, offset, formulaParts);
             }
-            else if (isOpenParenthesis(text.charAt(0))) {
-                formulaParts.add(parseParenthesis(text));
+            else if (isOpenParenthesis(text.charAt(offset))) {
+                offset = parseParenthesis(text, offset, formulaParts);
             }
-            else if (isCloseParenthesis(text.charAt(0))) {
-                return formulaParts;
+            else if (isCloseParenthesis(text.charAt(offset))) {
+                return offset;
             }
             else {
-                formulaParts.add(parseOperator(text));
+                offset = parseOperator(text, offset, formulaParts);
             }
         }
 
-        return formulaParts;
+        return offset;
     }
 
     private Formula composeFormula(Deque<Formula> formulaParts) {
